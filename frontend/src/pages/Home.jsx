@@ -16,6 +16,10 @@ export default function Home() {
 
   const [totalPages, setTotalPages] = useState(1);
 
+  // ✅ auth state
+  const token = localStorage.getItem("token");
+  const isLoggedIn = !!token;
+
   // Fetch posts whenever filters change
   useEffect(() => {
     fetchPosts();
@@ -39,7 +43,6 @@ export default function Home() {
 
       setPosts(data.posts || []);
       setTotalPages(data.pages || 1);
-
     } catch (err) {
       console.error(err);
       setError("Failed to load posts");
@@ -50,8 +53,16 @@ export default function Home() {
 
   const handleLike = async (id) => {
     try {
+      if (!isLoggedIn) {
+        window.location.href = "/login";
+        return;
+      }
+
       await fetch(`${API_URL}/api/posts/${id}/like`, {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       setPosts((prev) =>
@@ -83,10 +94,12 @@ export default function Home() {
       <button onClick={handleSearch}>Search</button>
 
       {/* 🏷 Filter Category */}
-      <select onChange={(e) => {
-        setCategory(e.target.value);
-        setPage(1);
-      }}>
+      <select
+        onChange={(e) => {
+          setCategory(e.target.value);
+          setPage(1);
+        }}
+      >
         <option value="">All Categories</option>
         <option value="1">Tech</option>
         <option value="2">Sports</option>
@@ -125,12 +138,24 @@ export default function Home() {
           <p>{post.content}</p>
 
           {/* ❤️ Like */}
-          <button onClick={() => handleLike(post.id)}>
-            ❤️ {post.likes}
-          </button>
+          {isLoggedIn ? (
+            <button onClick={() => handleLike(post.id)}>
+              ❤️ {post.likes}
+            </button>
+          ) : (
+            <button onClick={() => (window.location.href = "/login")}>
+              Login to like ❤️ {post.likes}
+            </button>
+          )}
 
           {/* 💬 Comments */}
-          <Comments postId={post.id} />
+          {isLoggedIn ? (
+            <Comments postId={post.id} />
+          ) : (
+            <p>
+              <a href="/login">Login</a> to view and add comments
+            </p>
+          )}
         </div>
       ))}
 

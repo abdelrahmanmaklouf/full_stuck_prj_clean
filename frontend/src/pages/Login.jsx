@@ -1,39 +1,36 @@
 import { useState } from "react";
-import { login } from "../services/authService";
+import api from "../services/api";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
     try {
-      const res = await login({ email, password });
+      const res = await api.post("/auth/login", {
+        email,
+        password,
+      });
 
+      // خزّن التوكن
       localStorage.setItem("token", res.data.token);
 
-      window.location.href = "/admin/posts";
+      alert("Login successful");
 
+      // تحويل لصفحة home
+      window.location.href = "/";
     } catch (err) {
       alert("Login failed");
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        placeholder="email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
-
-      <input
-        type="password"
-        placeholder="password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-
-      <button>Login</button>
+    <form onSubmit={handleLogin}>
+      <input placeholder="email" onChange={(e) => setEmail(e.target.value)} />
+      <input placeholder="password" type="password" onChange={(e) => setPassword(e.target.value)} />
+      <button type="submit">Login</button>
     </form>
   );
 }

@@ -7,7 +7,7 @@ const api = axios.create({
   },
 });
 
-// ✅ Add token to every request
+// Add token automatically
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
 
@@ -18,15 +18,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// 🔥 Global Error Handling
+// Global error handling
 api.interceptors.response.use(
   (res) => res,
   (err) => {
+    const status = err.response?.status;
+
     console.error("API Error:", err.response?.data || err.message);
 
-    if (err.response?.status === 401) {
+    if (status === 401) {
       localStorage.removeItem("token");
-      window.location.href = "/login";
+
+      // redirect to login
+      if (window.location.pathname !== "/login") {
+        window.location.href = "/login";
+      }
     }
 
     return Promise.reject(err);
@@ -34,3 +40,22 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+
+//import axios from "axios";
+
+// const api = axios.create({
+//   baseURL: "https://fullstuckprjclean-production.up.railway.app/api",
+// });
+
+// api.interceptors.request.use((config) => {
+//   const token = localStorage.getItem("token");
+
+//   if (token) {
+//     config.headers.Authorization = `Bearer ${token}`;
+//   }
+
+//   return config;
+// });
+
+// export default api;
