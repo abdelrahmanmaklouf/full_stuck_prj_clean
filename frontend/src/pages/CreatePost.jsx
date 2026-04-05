@@ -4,7 +4,7 @@ import { createPost } from "../services/postService";
 export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [categoryId, setCategoryId] = useState(""); // ✅ مهم
+  const [categoryId, setCategoryId] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,14 +19,23 @@ export default function CreatePost() {
       await createPost({
         title,
         content,
-        categoryId: Number(categoryId), // ✅ مهم
+        categoryId: Number(categoryId),
+        status: "published", // ✅ مهم جدًا
       });
 
       alert("Created!");
+
+      // optional reset
+      setTitle("");
+      setContent("");
+      setCategoryId("");
+
     } catch (err) {
-  console.error(err.response?.data || err.message); // 👈 مهم
-  setError(err.response?.data?.message || "Failed to create");
-}
+      console.error(err.response?.data || err.message);
+      setError(err.response?.data?.message || "Failed to create");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

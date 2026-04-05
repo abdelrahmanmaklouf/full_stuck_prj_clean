@@ -7,24 +7,18 @@ const { Op } = require("sequelize");
 // =========================
 exports.createPost = async (req, res) => {
   try {
-    const { title, content, status, categoryId, tagIds } = req.body;
+    const { title, content, categoryId, status } = req.body;
 
     const post = await Post.create({
       title,
       content,
-      status,
       categoryId,
-      likes: 0,
+      status: status || "draft", // ✅ يسمح من الفرونت أو default draft
     });
 
-    // Tags (many-to-many)
-    if (tagIds && tagIds.length > 0) {
-      await post.setTags(tagIds);
-    }
-
     res.status(201).json(post);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 };
 
