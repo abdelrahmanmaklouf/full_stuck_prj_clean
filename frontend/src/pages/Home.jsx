@@ -16,14 +16,14 @@ export default function Home() {
 
   const [totalPages, setTotalPages] = useState(1);
 
-  // ✅ auth state
+  // ✅ auth
   const token = localStorage.getItem("token");
   const isLoggedIn = !!token;
 
-  // Fetch posts whenever filters change
+  // ✅ fetch posts whenever anything changes
   useEffect(() => {
     fetchPosts();
-  }, [page, sort, category]);
+  }, [page, sort, category, search]);
 
   const fetchPosts = async () => {
     try {
@@ -75,11 +75,6 @@ export default function Home() {
     }
   };
 
-  const handleSearch = () => {
-    setPage(1);
-    fetchPosts();
-  };
-
   return (
     <div>
       <h1>Posts</h1>
@@ -88,13 +83,15 @@ export default function Home() {
       <input
         placeholder="Search posts..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={(e) => {
+          setSearch(e.target.value);
+          setPage(1); // reset pagination on search
+        }}
       />
 
-      <button onClick={handleSearch}>Search</button>
-
-      {/* 🏷 Filter Category */}
+      {/* 🏷 Category */}
       <select
+        value={category}
         onChange={(e) => {
           setCategory(e.target.value);
           setPage(1);
@@ -106,12 +103,13 @@ export default function Home() {
       </select>
 
       {/* 🔃 Sort */}
-      <select onChange={(e) => setSort(e.target.value)}>
+      <select
+        value={sort}
+        onChange={(e) => setSort(e.target.value)}
+      >
         <option value="latest">Latest</option>
         <option value="likes">Most Liked</option>
       </select>
-
-      <button onClick={fetchPosts}>Apply</button>
 
       {/* ⏳ Loading */}
       {loading && <p>Loading...</p>}
@@ -119,7 +117,7 @@ export default function Home() {
       {/* ❌ Error */}
       {error && <p>{error}</p>}
 
-      {/* 📄 Empty state */}
+      {/* 📄 Empty */}
       {!loading && posts.length === 0 && (
         <p>No posts available</p>
       )}
