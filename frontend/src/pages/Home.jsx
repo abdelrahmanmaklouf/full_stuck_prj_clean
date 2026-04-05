@@ -1,0 +1,162 @@
+import { useEffect, useState } from "react";
+import Comments from "../components/Comments";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+export default function Home() {
+  const [posts, setPosts] = useState([]);
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
+  const [category, setCategory] = useState("");
+  const [sort, setSort] = useState("latest");
+
+  const [totalPages, setTotalPages] = useState(1);
+
+  // Fetch posts whenever filters change
+  useEffect(() => {
+    fetchPosts();
+  }, [page, sort, category]);
+
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      let url = `${API_URL}/api/posts?page=${page}&sort=${sort}`;
+
+      if (search) url += `&search=${search}`;
+      if (category) url += `&category=${category}`;
+
+      const res = await fetch(url);
+
+      if (!res.ok) throw new Error("Request failed");
+
+      const data = await res.json();
+
+      setPosts(data.posts || []);
+      setTotalPages(data.pages || 1);
+
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load posts");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLike = async (id) => {
+    try {
+      await fetch(`${API_URL}/api/posts/${id}/like`, {
+        method: "POST",
+      });
+
+      setPosts((prev) =>
+        prev.map((p) =>
+          p.id === id ? { ...p, likes: p.likes + 1 } : p
+        )
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleSearch = () => {
+    setPage(1);
+    fetchPosts();
+  };
+
+  return (
+    <div>
+      <h1>Posts</h1>
+
+      {/* 🔍 Search */}
+      <input
+        placeholder="Search posts..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+      />
+
+      <button onClick={handleSearch}>Search</button>
+
+      {/* 🏷 Filter Category */}
+      <select onChange={(e) => {
+        setCategory(e.target.value);
+        setPage(1);
+      }}>
+        <option value="">All Categories</option>
+        <option value="1">Tech</option>
+        <option value="2">Sports</option>
+      </select>
+
+      {/* 🔃 Sort */}
+      <select onChange={(e) => setSort(e.target.value)}>
+        <option value="latest">Latest</option>
+        <option value="likes">Most Liked</option>
+      </select>
+
+      <button onClick={fetchPosts}>Apply</button>
+
+      {/* ⏳ Loading */}
+      {loading && <p>Loading...</p>}
+
+      {/* ❌ Error */}
+      {error && <p>{error}</p>}
+
+      {/* 📄 Empty state */}
+      {!loading && posts.length === 0 && (
+        <p>No posts available</p>
+      )}
+
+      {/* 📄 Posts */}
+      {posts.map((post) => (
+        <div
+          key={post.id}
+          style={{
+            border: "1px solid #ccc",
+            margin: "10px",
+            padding: "10px",
+          }}
+        >
+          <h3>{post.title}</h3>
+          <p>{post.content}</p>
+
+          {/* ❤️ Like */}
+          <button onClick={() => handleLike(post.id)}>
+            ❤️ {post.likes}
+          </button>
+
+          {/* 💬 Comments */}
+          <Comments postId={post.id} />
+        </div>
+      ))}
+
+      {/* 📄 Pagination */}
+      <div style={{ marginTop: "20px" }}>
+        <button
+          onClick={() => setPage((p) => Math.max(p - 1, 1))}
+          disabled={page === 1}
+        >
+          Prev
+        </button>
+
+        <span>
+          {" "}
+          Page {page} of {totalPages}{" "}
+        </span>
+
+        <button
+          onClick={() =>
+            setPage((p) => Math.min(p + 1, totalPages))
+          }
+          disabled={page === totalPages}
+        >
+          Next
+        </button>
+      </div>
+    </div>
+  );
+}
