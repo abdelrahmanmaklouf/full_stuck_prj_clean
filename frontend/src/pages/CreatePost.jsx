@@ -24,10 +24,9 @@ export default function CreatePost() {
 
       alert("Created!");
     } catch (err) {
-      setError("Failed to create");
-    } finally {
-      setLoading(false);
-    }
+  console.error(err.response?.data || err.message); // 👈 مهم
+  setError(err.response?.data?.message || "Failed to create");
+}
   };
 
   return (
