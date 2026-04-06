@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Admin = require("../models/Admin");
 
-const JWT_SECRET = "mysecretkey"; // بعدين نخليه env
+const JWT_SECRET = "mysecretkey"; // يفضل يتحط في .env لاحقًا
 
 // ✅ REGISTER
 exports.register = async (req, res) => {
@@ -26,9 +26,21 @@ exports.register = async (req, res) => {
       password: hashedPassword,
     });
 
+    // generate token
+    const token = jwt.sign(
+      { id: admin.id, role: "admin" },
+      JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
     res.status(201).json({
-      message: "Admin created successfully",
-      admin,
+      token,
+      user: {
+        id: admin.id,
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
+      },
     });
 
   } catch (err) {
@@ -37,7 +49,7 @@ exports.register = async (req, res) => {
 };
 
 
-// ✅ LOGIN (زي ما هو)
+// ✅ LOGIN
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -54,19 +66,29 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    // generate token
     const token = jwt.sign(
-      { id: admin.id },
+      { id: admin.id, role: "admin" },
       JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    res.json({ token });
+    res.json({
+      token,
+      user: {
+        id: admin.id,
+        email: admin.email,
+        role: "admin",
+      },
+    });
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+
+// ✅ GET CURRENT USER
 exports.getMe = async (req, res) => {
   try {
     const admin = await Admin.findByPk(req.admin.id);
@@ -77,8 +99,9 @@ exports.getMe = async (req, res) => {
 
     res.json({
       id: admin.id,
+      name: admin.name,
       email: admin.email,
-      role: "admin", // حالياً ثابت
+      role: "admin",
     });
 
   } catch (err) {

@@ -5,15 +5,15 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CreatePost from "./pages/CreatePost";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDashboard from "./admin/pages/Dashboard";
 import EditPost from "./admin/pages/Posts/EditPost";
 
 // Admin Pages
 import PostsList from "./admin/pages/Posts/PostsList";
-import CreatePostAdmin from "./admin/pages/Posts/PostsAdmin";
+import CreatePostAdmin from "./admin/pages/PostsAdmin";
 
 // Layouts
-import MainLayout from "./layouts/MainLayout";
+import MainLayout from "./layout/MainLayout";
 import AdminLayout from "./admin/layout/AdminLayout";
 
 // Guards
