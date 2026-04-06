@@ -1,61 +1,91 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
-// Public Pages
+// Pages
 import Home from "./pages/Home";
-import CreatePostPage from "./pages/CreatePost";
 import Login from "./pages/Login";
-
-// Public Layout
-import Layout from "./layout/Layout";
-
-// Admin Layout
-import AdminLayout from "./admin/layout/AdminLayout";
+import Register from "./pages/Register";
+import CreatePost from "./pages/CreatePost";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import EditPost from "./admin/pages/Posts/EditPost";
 
 // Admin Pages
 import PostsList from "./admin/pages/Posts/PostsList";
-import CreatePost from "./admin/pages/Posts/CreatePost";
-import EditPost from "./admin/pages/Posts/EditPost";
-import Comments from "./admin/pages/Comments";
-import Categories from "./admin/pages/Categories";
-import TagsAdmin from "./admin/pages/TagsAdmin";
+import CreatePostAdmin from "./admin/pages/Posts/PostsAdmin";
 
-// Protected Route
-import ProtectedRoute from "./components/ProtectedRoute";
+// Layouts
+import MainLayout from "./layouts/MainLayout";
+import AdminLayout from "./admin/layout/AdminLayout";
 
-export default function App() {
+// Guards
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
+import PublicRoute from "./routes/PublicRoute";
+
+// Auth
+import { useAuth } from "./context/AuthContext";
+
+function App() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <p>Loading...</p>;
+  }
+
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ================= PUBLIC ================= */}
-        <Route element={<Layout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/create" element={<CreatePostPage />} />
-          <Route path="/login" element={<Login />} />
-        </Route>
-
-        {/* ================= ADMIN ================= */}
+        {/* ✅ Public */}
         <Route
-          path="/admin"
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/register"
+          element={
+            <PublicRoute>
+              <Register />
+            </PublicRoute>
+          }
+        />
+
+        {/* ✅ User Layout */}
+        <Route
           element={
             <ProtectedRoute>
-              <AdminLayout />
+              <MainLayout />
             </ProtectedRoute>
           }
         >
-          <Route path="posts" element={<PostsList />} />
-          <Route path="posts/new" element={<CreatePost />} />
-          <Route path="posts/edit/:id" element={<EditPost />} />
-
-          <Route path="comments" element={<Comments />} />
-          <Route path="categories" element={<Categories />} />
-          <Route path="tags" element={<TagsAdmin />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/create" element={<CreatePost />} />
         </Route>
 
-        {/* ================= 404 ================= */}
-        <Route path="*" element={<h2>Page Not Found</h2>} />
+        {/* 👑 Admin Layout (Single Source of Truth) */}
+        <Route
+          element={
+            <AdminRoute>
+              <AdminLayout />
+            </AdminRoute>
+          }
+        >
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/posts" element={<PostsList />} />
+          <Route path="/admin/posts/create" element={<CreatePostAdmin />} />
+          <Route path="/admin/posts/edit/:id" element={<EditPost />} />
+        </Route>
+
+        {/* ❌ Fallback */}
+        <Route path="*" element={<Navigate to="/" />} />
 
       </Routes>
     </BrowserRouter>
   );
 }
+
+export default App;

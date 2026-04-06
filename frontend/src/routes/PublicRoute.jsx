@@ -2,15 +2,15 @@ import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 export default function PublicRoute({ children }) {
-  const { token, user, loading } = useAuth();
+  const { user, loading } = useAuth();
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <div>Loading...</div>;
 
-  if (token) {
-    if (user?.role === "admin") {
-      return <Navigate to="/admin" />;
+  if (user) {
+    if (user.role === "admin") {
+      return <Navigate to="/admin" replace />;
     }
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
