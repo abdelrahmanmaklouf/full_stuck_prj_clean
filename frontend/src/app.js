@@ -1,78 +1,78 @@
-const express = require("express");
-const cors = require("cors");
-const helmet = require("helmet");
-const rateLimit = require("express-rate-limit");
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-const categoryRoutes = require("./routes/categoryRoutes");
-const tagRoutes = require("./routes/tagRoutes");
-const postRoutes = require("./routes/postRoutes");
-const commentRoutes = require("./routes/commentRoutes");
-const authRoutes = require("./routes/authRoutes");
+import { AuthProvider } from "./context/AuthContext";
 
-const app = express();
+// pages
+import Home from "./pages/Home";
+import CreatePost from "./pages/CreatePost";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 
-// =======================
-// ✅ Security Middlewares
-// =======================
-app.use(helmet());
+// admin
+import AdminLayout from "./admin/layout/AdminLayout";
+import PostsList from "./admin/pages/PostsList";
 
-// =======================
-// ✅ CORS (Production Ready)
-// =======================
-app.use(
-  cors({
-    origin: process.env.CLIENT_URL || "*",
-    credentials: true,
-  })
-);
+// routes
+import ProtectedRoute from "./routes/ProtectedRoute";
+import AdminRoute from "./routes/AdminRoute";
+import PublicRoute from "./routes/PublicRoute";
 
-// =======================
-// ✅ Body Parser
-// =======================
-app.use(express.json());
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
 
-// =======================
-// ✅ Rate Limiting
-// =======================
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
-  max: 100,
-  message: "Too many requests from this IP, please try again later.",
-});
+          {/* ✅ Public */}
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
 
-app.use("/api", limiter);
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
 
-// =======================
-// ✅ Routes
-// =======================
-app.use("/api/auth", authRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/categories", categoryRoutes);
-app.use("/api/tags", tagRoutes);
-app.use("/api/comments", commentRoutes);
+          {/* ✅ User */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            }
+          />
 
-// =======================
-// ✅ Health Check
-// =======================
-app.get("/", (req, res) => {
-  res.send("API is running...");
-});
+          <Route
+            path="/create"
+            element={
+              <ProtectedRoute>
+                <CreatePost />
+              </ProtectedRoute>
+            }
+          />
 
-// =======================
-// ✅ 404 Handler
-// =======================
-app.use((req, res) => {
-  res.status(404).json({ message: "Route not found" });
-});
+          {/* ✅ Admin */}
+          <Route
+            path="/admin/*"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          />
 
-// =======================
-// ✅ Global Error Handler
-// =======================
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({
-    message: "Internal Server Error",
-  });
-});
-
-module.exports = app;
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
+  );
+}

@@ -66,3 +66,22 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+exports.getMe = async (req, res) => {
+  try {
+    const admin = await Admin.findByPk(req.admin.id);
+
+    if (!admin) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.json({
+      id: admin.id,
+      email: admin.email,
+      role: "admin", // حالياً ثابت
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
