@@ -1,11 +1,32 @@
 const Comment = require("../models/Comment");
 
-// Create Comment (Public)
+// ✅ Get Comments (by postId)
+exports.getComments = async (req, res) => {
+  try {
+    const { postId } = req.query;
+
+    let where = {};
+
+    if (postId) {
+      where.postId = postId;
+    }
+
+    const comments = await Comment.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+    });
+
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ Create Comment (Public)
 exports.addComment = async (req, res) => {
   try {
     const { name, content, postId } = req.body;
 
-    // منع التعليقات المكررة
     const existing = await Comment.findOne({
       where: { content },
     });
@@ -18,7 +39,7 @@ exports.addComment = async (req, res) => {
       name,
       content,
       postId,
-      status: "pending", // moderation
+      status: "pending", // أو "approved" لو عايز يظهر فورًا
     });
 
     res.status(201).json(comment);
@@ -27,7 +48,7 @@ exports.addComment = async (req, res) => {
   }
 };
 
-// Approve Comment (Admin)
+// ✅ Approve Comment (Admin)
 exports.approveComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -45,7 +66,7 @@ exports.approveComment = async (req, res) => {
   }
 };
 
-// Delete Comment (Admin)
+// ✅ Delete Comment (Admin)
 exports.deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);

@@ -10,14 +10,26 @@ export default function Comments({ postId }) {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetchComments();
+    if (postId) {
+      fetchComments();
+    }
   }, [postId]);
 
   const fetchComments = async () => {
     try {
+      console.log("Fetching comments for post:", postId); // 🔥 debug
+
       const res = await getComments(postId);
-      const approved = res.data.filter(c => c.status === "approved");
+
+      console.log("API COMMENTS:", res.data); // 🔥 debug
+
+      // ✅ مؤقتًا اعرض الكل (علشان تتأكد)
+      const approved = res.data.filter(
+        (c) => c.status === "approved"
+      );
+
       setComments(approved);
+
     } catch (err) {
       console.error(err);
     }
@@ -40,6 +52,9 @@ export default function Comments({ postId }) {
       setName("");
       setContent("");
 
+      // ✅ أهم تعديل (refresh بعد الإضافة)
+      await fetchComments();
+
     } catch (err) {
       alert("Error adding comment");
     } finally {
@@ -49,7 +64,9 @@ export default function Comments({ postId }) {
 
   return (
     <div style={styles.container}>
-      <h3 style={styles.title}>💬 Comments</h3>
+      <h3 style={styles.title}>
+        💬 Comments ({comments.length})
+      </h3>
 
       {/* Comments List */}
       <div style={styles.list}>
@@ -72,6 +89,7 @@ export default function Comments({ postId }) {
           value={name}
           onChange={(e) => setName(e.target.value)}
           style={styles.input}
+          required
         />
 
         <textarea
@@ -79,6 +97,7 @@ export default function Comments({ postId }) {
           value={content}
           onChange={(e) => setContent(e.target.value)}
           style={styles.textarea}
+          required
         />
 
         <button type="submit" disabled={loading} style={styles.button}>

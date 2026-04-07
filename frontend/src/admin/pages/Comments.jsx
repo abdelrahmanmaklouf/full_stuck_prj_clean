@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 
-export default function Comments() {
+export default function Comments({ postId }) {
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     fetchComments();
-  }, []);
+  }, [postId]);
 
   const fetchComments = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/comments");
-      setComments(res.data);
+
+      // ✅ ربط الكومنتات بالبوست
+      const res = await api.get(`/comments?postId=${postId}`);
+
+      // ✅ عرض approved فقط
+      const approved = res.data.filter(
+        (c) => c.status === "approved"
+      );
+
+      setComments(approved);
+
     } catch (err) {
       console.error(err);
     } finally {
@@ -35,10 +44,20 @@ export default function Comments() {
 
   return (
     <div>
-      <h2>Comments</h2>
+      <h2>Comments ({comments.length})</h2>
+
+      {comments.length === 0 && <p>No comments yet</p>}
 
       {comments.map((c) => (
-        <div key={c.id} style={{ border: "1px solid #ccc", margin: 10, padding: 10 }}>
+        <div
+          key={c.id}
+          style={{
+            border: "1px solid #ccc",
+            margin: 10,
+            padding: 10,
+            borderRadius: "8px",
+          }}
+        >
           <p><b>{c.name}</b></p>
           <p>{c.content}</p>
           <p>Status: {c.status}</p>
