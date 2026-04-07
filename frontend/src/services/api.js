@@ -1,7 +1,8 @@
 import axios from "axios";
 
+// خلي baseURL بدون /api (أفضل practice)
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });
 
 // ✅ Request Interceptor (إضافة التوكن تلقائي)
