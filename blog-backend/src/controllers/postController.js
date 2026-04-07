@@ -1,4 +1,5 @@
 const Post = require("../models/Post");
+const Comment = require("../models/Comment");
 const { Category, Tag } = require("../models");
 const { Op } = require("sequelize");
 
@@ -13,7 +14,7 @@ exports.createPost = async (req, res) => {
       title,
       content,
       categoryId,
-      status: status || "draft", // ✅ يسمح من الفرونت أو default draft
+      status: status || "draft",
     });
 
     res.status(201).json(post);
@@ -90,7 +91,7 @@ exports.getPosts = async (req, res) => {
 };
 
 // =========================
-// Get Single Post
+// Get Single Post (WITH COMMENTS)
 // =========================
 exports.getPostById = async (req, res) => {
   try {
@@ -98,6 +99,17 @@ exports.getPostById = async (req, res) => {
       include: [
         { model: Category },
         { model: Tag },
+        {
+          model: Comment,
+          where: { status: "approved" },
+          required: false,
+          include: [
+            {
+              model: User,
+              attributes: ["id", "name"],
+            },
+          ],
+        },
       ],
     });
 

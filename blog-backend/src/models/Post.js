@@ -9,22 +9,27 @@ const Post = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+
     categoryId: {
-  type: DataTypes.INTEGER,
-  allowNull: true,
-},
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
     title: {
       type: DataTypes.STRING,
       allowNull: false,
     },
+
     likes: {
-  type: DataTypes.INTEGER,
-  defaultValue: 0,
-},
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
     },
+
     status: {
       type: DataTypes.ENUM("draft", "published"),
       defaultValue: "draft",

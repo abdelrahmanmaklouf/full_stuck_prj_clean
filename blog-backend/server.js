@@ -2,8 +2,14 @@ require("dotenv").config();
 
 const app = require("./src/app");
 const { connectDB, sequelize } = require("./src/config/db");
+const commentRoutes = require("./routes/commentRoutes");
+// ✅ مهم جدًا: تحميل المودلز والعلاقات
+require("./src/models");
 
 const PORT = process.env.PORT || 5000;
+
+
+app.use("/api", commentRoutes);
 
 const startServer = async () => {
   try {

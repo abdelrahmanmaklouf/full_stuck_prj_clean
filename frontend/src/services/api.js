@@ -1,6 +1,6 @@
 import axios from "axios";
 
-// خلي baseURL بدون /api (أفضل practice)
+// baseURL includes /api (correct)
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/api",
 });

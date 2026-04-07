@@ -2,18 +2,22 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  getComments,
   addComment,
+  getComments,
   approveComment,
   deleteComment,
 } = require("../controllers/commentController");
 
+const auth = require("../middleware/auth");
+
 // Public
-router.get("/", getComments);
-router.post("/", addComment);
+router.get("/comments", getComments);
+
+// Protected
+router.post("/comments", auth, addComment);
 
 // Admin
-router.put("/:id/approve", approveComment);
-router.delete("/:id", deleteComment);
+router.put("/comments/:id/approve", auth, approveComment);
+router.delete("/comments/:id", auth, deleteComment);
 
 module.exports = router;

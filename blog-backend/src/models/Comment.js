@@ -9,17 +9,17 @@ const Comment = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
+
     postId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    name: {
-      type: DataTypes.STRING,
+
+    userId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
-      validate: {
-        notEmpty: true,
-      },
     },
+
     content: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -27,6 +27,7 @@ const Comment = sequelize.define(
         notEmpty: true,
       },
     },
+
     status: {
       type: DataTypes.ENUM("pending", "approved"),
       defaultValue: "pending",

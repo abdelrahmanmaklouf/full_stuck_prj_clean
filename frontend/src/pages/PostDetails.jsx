@@ -1,68 +1,84 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
-import Comments from "../components/Comments";
+import { addComment } from "../services/commentService";
+import { toggleLike } from "../services/postService";
 
 export default function PostDetails() {
   const { id } = useParams();
+
   const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
+  const [content, setContent] = useState("");
 
   useEffect(() => {
     fetchPost();
-  }, [id]);
+    fetchComments();
+  }, []);
 
   const fetchPost = async () => {
-    try {
-      setLoading(true);
-      const { data } = await api.get(`/posts/${id}`);
-      setPost(data.post || data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    const res = await api.get(`/posts/${id}`);
+    setPost(res.data);
   };
 
-  if (loading) return <p style={styles.center}>Loading...</p>;
-  if (!post) return <p style={styles.center}>Post not found</p>;
+  const fetchComments = async () => {
+    const res = await api.get(`/comments?postId=${id}`);
+    setComments(res.data);
+  };
+
+  const handleLike = async () => {
+    await toggleLike(id);
+    fetchPost();
+  };
+
+  const handleComment = async () => {
+    if (!content) return;
+
+    await addComment({
+      content,
+      postId: id,
+    });
+
+    setContent("");
+    fetchComments();
+  };
+
+  if (!post) return <p>Loading...</p>;
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.title}>{post.title}</h1>
+    <div id="app">
+      {/* Post */}
+      <div className="card">
+        <h1>{post.title}</h1>
+        <p>{post.content}</p>
 
-        <p style={styles.content}>{post.content}</p>
+        <button onClick={handleLike}>
+          👍 Like ({post.likes || 0})
+        </button>
+      </div>
 
-        <hr style={{ margin: "20px 0" }} />
+      {/* Add Comment */}
+      <div className="card">
+        <h2>Add Comment</h2>
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Write a comment..."
+        />
+        <button onClick={handleComment}>Post</button>
+      </div>
 
-        <Comments postId={id} />
+      {/* Comments */}
+      <div className="feed">
+        {comments.map((c) => (
+          <div key={c.id} className="card">
+            <strong style={{ color: "#c084fc" }}>
+              {c.User?.name}
+            </strong>
+            <p>{c.content}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    padding: "20px",
-    maxWidth: "800px",
-    margin: "auto",
-  },
-  card: {
-    background: "#fff",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-  },
-  title: {
-    marginBottom: "15px",
-  },
-  content: {
-    lineHeight: "1.6",
-    color: "#444",
-  },
-  center: {
-    textAlign: "center",
-    marginTop: "50px",
-  },
-};

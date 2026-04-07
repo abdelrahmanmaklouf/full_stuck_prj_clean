@@ -1,6 +1,9 @@
 const Comment = require("../models/Comment");
+const User = require("../models/User");
 
-// ✅ Get Comments (by postId)
+// =========================
+// Get Comments (by postId)
+// =========================
 exports.getComments = async (req, res) => {
   try {
     const { postId } = req.query;
@@ -13,6 +16,12 @@ exports.getComments = async (req, res) => {
 
     const comments = await Comment.findAll({
       where,
+      include: [
+        {
+          model: User,
+          attributes: ["id", "name"], // 👈 نجيب اسم اليوزر
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
@@ -22,24 +31,20 @@ exports.getComments = async (req, res) => {
   }
 };
 
-// ✅ Create Comment (Public)
+// =========================
+// Create Comment (AUTH REQUIRED)
+// =========================
 exports.addComment = async (req, res) => {
   try {
-    const { name, content, postId } = req.body;
+    const { content, postId } = req.body;
 
-    const existing = await Comment.findOne({
-      where: { content },
-    });
-
-    if (existing) {
-      return res.status(400).json({ message: "Duplicate comment detected" });
-    }
+    const userId = req.user.id; // 👈 من الـ JWT
 
     const comment = await Comment.create({
-      name,
       content,
       postId,
-      status: "pending", // أو "approved" لو عايز يظهر فورًا
+      userId, // 👈 مرتبط باليوزر
+      status: "pending",
     });
 
     res.status(201).json(comment);
@@ -48,7 +53,9 @@ exports.addComment = async (req, res) => {
   }
 };
 
-// ✅ Approve Comment (Admin)
+// =========================
+// Approve Comment (Admin)
+// =========================
 exports.approveComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
@@ -66,7 +73,9 @@ exports.approveComment = async (req, res) => {
   }
 };
 
-// ✅ Delete Comment (Admin)
+// =========================
+// Delete Comment (Admin)
+// =========================
 exports.deleteComment = async (req, res) => {
   try {
     const comment = await Comment.findByPk(req.params.id);
