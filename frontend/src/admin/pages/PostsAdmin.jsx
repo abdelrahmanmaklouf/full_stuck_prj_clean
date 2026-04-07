@@ -12,10 +12,16 @@ export default function CreatePost() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!title || !content) {
+      alert("Please fill all fields");
+      return;
+    }
+
     setLoading(true);
 
     try {
-      await api.post("/api/posts", {
+      await api.post("/posts", {
         title,
         content,
         status,
@@ -23,6 +29,7 @@ export default function CreatePost() {
 
       alert("Post created successfully ✅");
       navigate("/admin/posts");
+
     } catch (err) {
       console.error(err);
       alert("Error creating post ❌");

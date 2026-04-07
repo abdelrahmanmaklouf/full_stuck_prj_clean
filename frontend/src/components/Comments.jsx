@@ -17,14 +17,19 @@ export default function Comments({ postId }) {
 
   const fetchComments = async () => {
     try {
-      console.log("Fetching comments for post:", postId); // 🔥 debug
+      console.log("Fetching comments for post:", postId);
 
       const res = await getComments(postId);
 
-      console.log("API COMMENTS:", res.data); // 🔥 debug
+      console.log("API COMMENTS:", res.data);
 
-      // ✅ مؤقتًا اعرض الكل (علشان تتأكد)
-      const approved = res.data.filter(
+      // ✅ التعامل مع أكثر من شكل للـ response
+      const commentsData = Array.isArray(res.data)
+        ? res.data
+        : res.data?.comments || [];
+
+      // ✅ فلترة المقبول فقط
+      const approved = commentsData.filter(
         (c) => c.status === "approved"
       );
 
@@ -32,6 +37,7 @@ export default function Comments({ postId }) {
 
     } catch (err) {
       console.error(err);
+      setComments([]); // fallback آمن
     }
   };
 
@@ -52,10 +58,11 @@ export default function Comments({ postId }) {
       setName("");
       setContent("");
 
-      // ✅ أهم تعديل (refresh بعد الإضافة)
+      // refresh comments
       await fetchComments();
 
     } catch (err) {
+      console.error(err);
       alert("Error adding comment");
     } finally {
       setLoading(false);
@@ -74,12 +81,13 @@ export default function Comments({ postId }) {
           <p style={styles.empty}>No comments yet</p>
         )}
 
-        {comments.map((c) => (
-          <div key={c.id} style={styles.commentCard}>
-            <strong style={styles.name}>{c.name}</strong>
-            <p style={styles.content}>{c.content}</p>
-          </div>
-        ))}
+        {Array.isArray(comments) &&
+          comments.map((c) => (
+            <div key={c._id || c.id} style={styles.commentCard}>
+              <strong style={styles.name}>{c.name}</strong>
+              <p style={styles.content}>{c.content}</p>
+            </div>
+          ))}
       </div>
 
       {/* Form */}
