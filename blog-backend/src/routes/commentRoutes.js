@@ -9,6 +9,7 @@ const {
 } = require("../controllers/commentController");
 
 const auth = require("../middlewares/authMiddleware");
+const admin = require("../middlewares/adminMiddleware"); // ✅ لازم تضيف ده
 
 // Public
 router.get("/comments", getComments);
