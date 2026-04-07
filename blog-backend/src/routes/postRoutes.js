@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const auth = require("../middlewares/authMiddleware");
+const admin = require("../middleware/adminMiddleware");
 
 const {
   createPost,
@@ -22,6 +23,6 @@ router.post("/:id/like", likePost);
 // 🔒 Protected routes (Admin/User auth)
 router.post("/", auth, createPost);
 router.put("/:id", auth, updatePost);
-router.delete("/:id", auth, deletePost);
+router.delete("/:id", auth, admin, deletePost);
 
 module.exports = router;

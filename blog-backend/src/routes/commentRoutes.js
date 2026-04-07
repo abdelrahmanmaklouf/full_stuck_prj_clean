@@ -17,7 +17,7 @@ router.get("/comments", getComments);
 router.post("/comments", auth, addComment);
 
 // Admin
-router.put("/comments/:id/approve", auth, approveComment);
-router.delete("/comments/:id", auth, deleteComment);
+router.patch("/:id/approve", auth, admin, approveComment);
+router.delete("/:id", auth, admin, deleteComment);
 
 module.exports = router;

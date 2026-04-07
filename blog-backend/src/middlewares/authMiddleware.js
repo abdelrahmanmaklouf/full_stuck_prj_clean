@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 
-const JWT_SECRET = "mysecretkey";
+const JWT_SECRET = process.env.JWT_SECRET || "mysecretkey";
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
@@ -14,7 +14,8 @@ module.exports = (req, res, next) => {
 
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    req.admin = decoded;
+    // 🔥 أهم تعديل
+    req.user = decoded; // بدل req.admin
 
     next();
 

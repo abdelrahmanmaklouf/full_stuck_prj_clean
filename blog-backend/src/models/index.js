@@ -77,5 +77,5 @@ module.exports = {
   Tag,
   PostTag,
   PostLike,
-  User,
+  User, // ✅ مهم
 };

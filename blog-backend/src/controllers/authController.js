@@ -1,34 +1,39 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-const Admin = require("../models/Admin");
 
-const JWT_SECRET = "mysecretkey"; // يفضل يتحط في .env لاحقًا
+// 🔥 بدل Admin بس → نستخدم User
+const User = require("../models/User");
 
-// ✅ REGISTER
+const JWT_SECRET = process.env.JWT_SECRET || "mysecretkey";
+
+// ==========================
+// ✅ REGISTER (User Only)
+// ==========================
 exports.register = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // check if admin exists
-    const existingAdmin = await Admin.findOne({ where: { email } });
+    // check if user exists
+    const existingUser = await User.findOne({ where: { email } });
 
-    if (existingAdmin) {
-      return res.status(400).json({ message: "Admin already exists" });
+    if (existingUser) {
+      return res.status(400).json({ message: "User already exists" });
     }
 
     // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // create admin
-    const admin = await Admin.create({
+    // 🔥 create user (FORCE role = user)
+    const user = await User.create({
       name,
       email,
       password: hashedPassword,
+      role: "user", // 🔒 مهم جدًا
     });
 
     // generate token
     const token = jwt.sign(
-      { id: admin.id, role: "admin" },
+      { id: user.id, role: user.role },
       JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -36,10 +41,10 @@ exports.register = async (req, res) => {
     res.status(201).json({
       token,
       user: {
-        id: admin.id,
-        name: admin.name,
-        email: admin.email,
-        role: "admin",
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       },
     });
 
@@ -48,19 +53,20 @@ exports.register = async (req, res) => {
   }
 };
 
-
-// ✅ LOGIN
+// ==========================
+// ✅ LOGIN (User أو Admin)
+// ==========================
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const admin = await Admin.findOne({ where: { email } });
+    const user = await User.findOne({ where: { email } });
 
-    if (!admin) {
+    if (!user) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, admin.password);
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
@@ -68,7 +74,7 @@ exports.login = async (req, res) => {
 
     // generate token
     const token = jwt.sign(
-      { id: admin.id, role: "admin" },
+      { id: user.id, role: user.role }, // 🔥 role من DB
       JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -76,9 +82,10 @@ exports.login = async (req, res) => {
     res.json({
       token,
       user: {
-        id: admin.id,
-        email: admin.email,
-        role: "admin",
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       },
     });
 
@@ -87,21 +94,22 @@ exports.login = async (req, res) => {
   }
 };
 
-
+// ==========================
 // ✅ GET CURRENT USER
+// ==========================
 exports.getMe = async (req, res) => {
   try {
-    const admin = await Admin.findByPk(req.admin.id);
+    const user = await User.findByPk(req.user.id);
 
-    if (!admin) {
+    if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
     res.json({
-      id: admin.id,
-      name: admin.name,
-      email: admin.email,
-      role: "admin",
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
     });
 
   } catch (err) {
