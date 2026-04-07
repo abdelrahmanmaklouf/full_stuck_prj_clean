@@ -24,17 +24,45 @@ export default function PostDetails() {
     }
   };
 
-  if (loading) return <p>Loading...</p>;
-  if (!post) return <p>Post not found</p>;
+  if (loading) return <p style={styles.center}>Loading...</p>;
+  if (!post) return <p style={styles.center}>Post not found</p>;
 
   return (
-    <div style={{ padding: "20px", maxWidth: "800px", margin: "auto" }}>
-      <h1>{post.title}</h1>
-      <p>{post.content}</p>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h1 style={styles.title}>{post.title}</h1>
 
-      <hr />
+        <p style={styles.content}>{post.content}</p>
 
-      <Comments postId={id} />
+        <hr style={{ margin: "20px 0" }} />
+
+        <Comments postId={id} />
+      </div>
     </div>
   );
 }
+
+const styles = {
+  container: {
+    padding: "20px",
+    maxWidth: "800px",
+    margin: "auto",
+  },
+  card: {
+    background: "#fff",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+  },
+  title: {
+    marginBottom: "15px",
+  },
+  content: {
+    lineHeight: "1.6",
+    color: "#444",
+  },
+  center: {
+    textAlign: "center",
+    marginTop: "50px",
+  },
+};

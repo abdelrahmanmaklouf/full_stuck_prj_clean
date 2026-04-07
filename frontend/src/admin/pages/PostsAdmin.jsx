@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 
-
 export default function CreatePost() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -33,62 +32,103 @@ export default function CreatePost() {
   };
 
   return (
-    <div>
-      <h2>Create Post</h2>
+    <div style={styles.container}>
+      <div style={styles.card}>
+        <h2 style={styles.title}>➕ Create New Post</h2>
 
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          style={styles.input}
-          required
-        />
+        <form onSubmit={handleSubmit} style={styles.form}>
+          <div style={styles.field}>
+            <label>Title</label>
+            <input
+              type="text"
+              placeholder="Enter post title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              style={styles.input}
+              required
+            />
+          </div>
 
-        <textarea
-          placeholder="Content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          style={styles.textarea}
-          required
-        />
+          <div style={styles.field}>
+            <label>Content</label>
+            <textarea
+              placeholder="Write your post content..."
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              style={styles.textarea}
+              required
+            />
+          </div>
 
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          style={styles.input}
-        >
-          <option value="draft">Draft</option>
-          <option value="published">Published</option>
-        </select>
+          <div style={styles.field}>
+            <label>Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              style={styles.input}
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+          </div>
 
-        <button type="submit" disabled={loading} style={styles.button}>
-          {loading ? "Creating..." : "Create Post"}
-        </button>
-      </form>
+          <button type="submit" disabled={loading} style={styles.button}>
+            {loading ? "Creating..." : "Create Post"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
 
 const styles = {
+  container: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    background: "#fff",
+    padding: "25px",
+    borderRadius: "10px",
+    width: "100%",
+    maxWidth: "600px",
+    boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+  },
+  title: {
+    marginBottom: "20px",
+  },
   form: {
     display: "flex",
     flexDirection: "column",
-    gap: "10px",
-    maxWidth: "500px",
+    gap: "15px",
+  },
+  field: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "5px",
   },
   input: {
     padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
     fontSize: "14px",
   },
   textarea: {
     padding: "10px",
+    borderRadius: "6px",
+    border: "1px solid #ccc",
     fontSize: "14px",
     minHeight: "120px",
+    resize: "vertical",
   },
   button: {
-    padding: "10px",
+    padding: "12px",
+    borderRadius: "6px",
+    border: "none",
+    background: "#111",
+    color: "#fff",
     cursor: "pointer",
+    fontWeight: "bold",
   },
 };

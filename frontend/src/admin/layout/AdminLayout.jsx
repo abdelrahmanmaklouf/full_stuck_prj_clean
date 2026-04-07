@@ -3,12 +3,28 @@ import AdminSidebar from "./Sidebar";
 
 export default function AdminLayout() {
   return (
-    <div style={{ display: "flex" }}>
+    <div style={styles.container}>
+      {/* Sidebar */}
       <AdminSidebar />
 
-      <div style={{ marginLeft: "220px", padding: "20px", width: "100%" }}>
+      {/* Main Content */}
+      <div style={styles.main}>
         <Outlet />
       </div>
     </div>
   );
-} 
+}
+
+const styles = {
+  container: {
+    display: "flex",
+    minHeight: "100vh",
+    background: "#f4f6f9",
+  },
+  main: {
+    marginLeft: "220px",
+    padding: "25px",
+    width: "100%",
+    background: "#f4f6f9",
+  },
+};
