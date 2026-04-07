@@ -2,7 +2,7 @@ require("dotenv").config();
 
 const app = require("./src/app");
 const { connectDB, sequelize } = require("./src/config/db");
-const commentRoutes = require("./routes/commentRoutes");
+const commentRoutes = require("./src/routes/commentRoutes");
 // ✅ مهم جدًا: تحميل المودلز والعلاقات
 require("./src/models");
 
