@@ -1,11 +1,10 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Comments from "../components/Comments";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import api from "../services/api";
 
 export default function Home() {
   const [posts, setPosts] = useState([]);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -16,11 +15,11 @@ export default function Home() {
 
   const [totalPages, setTotalPages] = useState(1);
 
-  // ✅ auth
+  const navigate = useNavigate();
+
   const token = localStorage.getItem("token");
   const isLoggedIn = !!token;
 
-  // ✅ fetch posts whenever anything changes
   useEffect(() => {
     fetchPosts();
   }, [page, sort, category, search]);
@@ -30,19 +29,29 @@ export default function Home() {
       setLoading(true);
       setError(null);
 
-      let url = `${API_URL}/api/posts?page=${page}&sort=${sort}`;
+      const res = await api.get("/api/posts", {
+        params: {
+          page,
+          sort,
+          search,
+          category,
+        },
+      });
 
-      if (search) url += `&search=${search}`;
-      if (category) url += `&category=${category}`;
+      const data = res.data;
 
-      const res = await fetch(url);
+      console.log("API RESPONSE:", data); // 🔥 مهم للتشخيص
 
-      if (!res.ok) throw new Error("Request failed");
+      // ✅ دعم كل أشكال الريسبونس
+      const postsData =
+        data.posts ||
+        data.data ||
+        data.rows ||
+        data;
 
-      const data = await res.json();
+      setPosts(Array.isArray(postsData) ? postsData : []);
+      setTotalPages(data.pages || data.totalPages || 1);
 
-      setPosts(data.posts || []);
-      setTotalPages(data.pages || 1);
     } catch (err) {
       console.error(err);
       setError("Failed to load posts");
@@ -54,20 +63,15 @@ export default function Home() {
   const handleLike = async (id) => {
     try {
       if (!isLoggedIn) {
-        window.location.href = "/login";
+        navigate("/login");
         return;
       }
 
-      await fetch(`${API_URL}/api/posts/${id}/like`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      await api.post(`/api/posts/${id}/like`);
 
       setPosts((prev) =>
         prev.map((p) =>
-          p.id === id ? { ...p, likes: p.likes + 1 } : p
+          p.id === id ? { ...p, likes: (p.likes || 0) + 1 } : p
         )
       );
     } catch (err) {
@@ -76,49 +80,91 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h1>Posts</h1>
+    <div style={{ padding: "20px", maxWidth: "900px", margin: "auto" }}>
 
-      {/* 🔍 Search */}
-      <input
-        placeholder="Search posts..."
-        value={search}
-        onChange={(e) => {
-          setSearch(e.target.value);
-          setPage(1); // reset pagination on search
-        }}
-      />
-
-      {/* 🏷 Category */}
-      <select
-        value={category}
-        onChange={(e) => {
-          setCategory(e.target.value);
-          setPage(1);
+      {/* 🔥 HEADER */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "20px",
         }}
       >
-        <option value="">All Categories</option>
-        <option value="1">Tech</option>
-        <option value="2">Sports</option>
-      </select>
+        <h1>📝 Posts</h1>
 
-      {/* 🔃 Sort */}
-      <select
-        value={sort}
-        onChange={(e) => setSort(e.target.value)}
+        <div>
+          {!isLoggedIn ? (
+            <>
+              <button onClick={() => navigate("/login")}>
+                Login
+              </button>
+
+              <button
+                onClick={() => navigate("/register")}
+                style={{ marginLeft: "10px" }}
+              >
+                Sign Up
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => {
+                localStorage.removeItem("token");
+                window.location.reload();
+              }}
+            >
+              Logout
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* 🔍 Controls */}
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          marginBottom: "20px",
+        }}
       >
-        <option value="latest">Latest</option>
-        <option value="likes">Most Liked</option>
-      </select>
+        <input
+          placeholder="Search posts..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setPage(1);
+          }}
+          style={{ padding: "8px", flex: "1" }}
+        />
+
+        <select
+          value={category}
+          onChange={(e) => {
+            setCategory(e.target.value);
+            setPage(1);
+          }}
+        >
+          <option value="">All Categories</option>
+          <option value="1">Tech</option>
+          <option value="2">Sports</option>
+        </select>
+
+        <select value={sort} onChange={(e) => setSort(e.target.value)}>
+          <option value="latest">Latest</option>
+          <option value="likes">Most Liked</option>
+        </select>
+      </div>
 
       {/* ⏳ Loading */}
       {loading && <p>Loading...</p>}
 
       {/* ❌ Error */}
-      {error && <p>{error}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
 
-      {/* 📄 Empty */}
-      {!loading && posts.length === 0 && (
+      {/* 📭 Empty */}
+      {!loading && !error && posts.length === 0 && (
         <p>No posts available</p>
       )}
 
@@ -127,38 +173,65 @@ export default function Home() {
         <div
           key={post.id}
           style={{
-            border: "1px solid #ccc",
-            margin: "10px",
-            padding: "10px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            padding: "15px",
+            marginBottom: "15px",
+            background: "#fff",
+            cursor: "pointer",
+            transition: "0.2s",
           }}
+          onClick={() => navigate(`/posts/${post.id}`)}
         >
           <h3>{post.title}</h3>
-          <p>{post.content}</p>
+
+          <p>
+            {post.content
+              ? post.content.slice(0, 100)
+              : "No content"}...
+          </p>
 
           {/* ❤️ Like */}
-          {isLoggedIn ? (
-            <button onClick={() => handleLike(post.id)}>
-              ❤️ {post.likes}
-            </button>
-          ) : (
-            <button onClick={() => (window.location.href = "/login")}>
-              Login to like ❤️ {post.likes}
-            </button>
-          )}
+          <div style={{ marginTop: "10px" }}>
+            {isLoggedIn ? (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleLike(post.id);
+                }}
+              >
+                ❤️ {post.likes || 0}
+              </button>
+            ) : (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  navigate("/login");
+                }}
+              >
+                Login to like ❤️ {post.likes || 0}
+              </button>
+            )}
+          </div>
 
           {/* 💬 Comments */}
-          {isLoggedIn ? (
-            <Comments postId={post.id} />
-          ) : (
-            <p>
-              <a href="/login">Login</a> to view and add comments
-            </p>
-          )}
+          <div style={{ marginTop: "10px" }}>
+            {isLoggedIn ? (
+              <Comments postId={post.id} />
+            ) : (
+              <p>
+                <button onClick={() => navigate("/login")}>
+                  Login
+                </button>{" "}
+                to view comments
+              </p>
+            )}
+          </div>
         </div>
       ))}
 
       {/* 📄 Pagination */}
-      <div style={{ marginTop: "20px" }}>
+      <div style={{ marginTop: "20px", textAlign: "center" }}>
         <button
           onClick={() => setPage((p) => Math.max(p - 1, 1))}
           disabled={page === 1}
@@ -166,15 +239,12 @@ export default function Home() {
           Prev
         </button>
 
-        <span>
-          {" "}
-          Page {page} of {totalPages}{" "}
+        <span style={{ margin: "0 10px" }}>
+          Page {page} of {totalPages}
         </span>
 
         <button
-          onClick={() =>
-            setPage((p) => Math.min(p + 1, totalPages))
-          }
+          onClick={() => setPage((p) => Math.min(p + 1, totalPages))}
           disabled={page === totalPages}
         >
           Next

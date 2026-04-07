@@ -12,6 +12,10 @@ import EditPost from "./admin/pages/Posts/EditPost";
 import PostsList from "./admin/pages/Posts/PostsList";
 import CreatePostAdmin from "./admin/pages/PostsAdmin";
 
+// أضف الاستيراد
+import PostDetails from "./pages/PostDetails";
+
+
 // Layouts
 import MainLayout from "./layout/MainLayout";
 import AdminLayout from "./admin/layout/AdminLayout";
@@ -35,7 +39,11 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* ✅ Public */}
+        {/* 🏠 Landing Page (Public Open) */}
+        <Route path="/" element={<Home />} />
+        <Route path="/posts/:id" element={<PostDetails />} />
+
+        {/* 🔓 Public Auth Pages */}
         <Route
           path="/login"
           element={
@@ -54,7 +62,7 @@ function App() {
           }
         />
 
-        {/* ✅ User Layout */}
+        {/* 👤 Protected User Area */}
         <Route
           element={
             <ProtectedRoute>
@@ -62,11 +70,10 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/" element={<Home />} />
           <Route path="/create" element={<CreatePost />} />
         </Route>
 
-        {/* 👑 Admin Layout (Single Source of Truth) */}
+        {/* 👑 Admin Area */}
         <Route
           element={
             <AdminRoute>

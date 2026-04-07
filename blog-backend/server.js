@@ -10,7 +10,7 @@ const startServer = async () => {
     // Connect to DB
     await connectDB();
 
-    // Sync models (for initial deployment only)
+    // Sync models (use cautiously in production)
     await sequelize.sync();
 
     app.listen(PORT, () => {

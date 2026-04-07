@@ -17,7 +17,7 @@ const app = express();
 app.use(helmet());
 
 // =======================
-// ✅ CORS (Production Ready)
+// ✅ CORS
 // =======================
 app.use(
   cors({
@@ -35,7 +35,7 @@ app.use(express.json());
 // ✅ Rate Limiting
 // =======================
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 min
+  windowMs: 15 * 60 * 1000,
   max: 100,
   message: "Too many requests from this IP, please try again later.",
 });
@@ -43,7 +43,7 @@ const limiter = rateLimit({
 app.use("/api", limiter);
 
 // =======================
-// ✅ Routes
+// ✅ API Routes
 // =======================
 app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
@@ -59,14 +59,14 @@ app.get("/", (req, res) => {
 });
 
 // =======================
-// ✅ 404 Handler
+// ❌ 404 Handler
 // =======================
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
 // =======================
-// ✅ Global Error Handler
+// ❌ Global Error Handler
 // =======================
 app.use((err, req, res, next) => {
   console.error(err.stack);
