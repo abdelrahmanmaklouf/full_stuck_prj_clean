@@ -5,20 +5,16 @@ import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import CreatePost from "./pages/CreatePost";
-import AdminDashboard from "./admin/pages/Dashboard";
-import EditPost from "./admin/pages/Posts/EditPost";
-
-// Admin Pages
-import PostsList from "./admin/pages/Posts/PostsList";
-import CreatePostAdmin from "./admin/pages/PostsAdmin";
-
-// أضف الاستيراد
 import PostDetails from "./pages/PostDetails";
 
+// Admin Pages
+import AdminDashboard from "./admin/pages/Dashboard";
+import PostsList from "./admin/pages/Posts/PostsList";
+import CreatePostAdmin from "./admin/pages/PostsAdmin";
+import EditPost from "./admin/pages/Posts/EditPost";
 
-// Layouts
+// Layout (Unified)
 import MainLayout from "./layout/MainLayout";
-import AdminLayout from "./admin/layout/AdminLayout";
 
 // Guards
 import ProtectedRoute from "./routes/ProtectedRoute";
@@ -39,52 +35,79 @@ function App() {
     <BrowserRouter>
       <Routes>
 
-        {/* 🏠 Landing Page (Public Open) */}
-        <Route path="/" element={<Home />} />
-        <Route path="/posts/:id" element={<PostDetails />} />
+        {/* 🧱 Unified Layout لكل الصفحات */}
+        <Route path="/" element={<MainLayout />}>
+          
+          {/* 🏠 Public Pages */}
+          <Route index element={<Home />} />
+          <Route path="posts/:id" element={<PostDetails />} />
 
-        {/* 🔓 Public Auth Pages */}
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
+          {/* 🔓 Auth Pages */}
+          <Route
+            path="login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
 
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
+          <Route
+            path="register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
 
-        {/* 👤 Protected User Area */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <MainLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/create" element={<CreatePost />} />
-        </Route>
+          {/* 👤 User Protected */}
+          <Route
+            path="create"
+            element={
+              <ProtectedRoute>
+                <CreatePost />
+              </ProtectedRoute>
+            }
+          />
 
-        {/* 👑 Admin Area */}
-        <Route
-          element={
-            <AdminRoute>
-              <AdminLayout />
-            </AdminRoute>
-          }
-        >
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/posts" element={<PostsList />} />
-          <Route path="/admin/posts/create" element={<CreatePostAdmin />} />
-          <Route path="/admin/posts/edit/:id" element={<EditPost />} />
+          {/* 👑 Admin Protected */}
+          <Route
+            path="admin"
+            element={
+              <AdminRoute>
+                <AdminDashboard />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="admin/posts"
+            element={
+              <AdminRoute>
+                <PostsList />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="admin/posts/create"
+            element={
+              <AdminRoute>
+                <CreatePostAdmin />
+              </AdminRoute>
+            }
+          />
+
+          <Route
+            path="admin/posts/edit/:id"
+            element={
+              <AdminRoute>
+                <EditPost />
+              </AdminRoute>
+            }
+          />
+
         </Route>
 
         {/* ❌ Fallback */}
