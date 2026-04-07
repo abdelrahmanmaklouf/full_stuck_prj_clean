@@ -8,7 +8,7 @@ const {
   deleteComment,
 } = require("../controllers/commentController");
 
-const auth = require("../middleware/auth");
+const auth = require("../middlewares/authMiddleware");
 
 // Public
 router.get("/comments", getComments);
