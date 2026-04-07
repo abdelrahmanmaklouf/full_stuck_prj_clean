@@ -15,7 +15,7 @@ export default function PostDetails() {
   const fetchPost = async () => {
     try {
       setLoading(true);
-      const { data } = await api.get(`/api/posts/${id}`);
+      const { data } = await api.get(`/posts/${id}`);
       setPost(data.post || data);
     } catch (err) {
       console.error(err);

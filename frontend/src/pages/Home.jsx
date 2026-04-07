@@ -29,7 +29,7 @@ export default function Home() {
       setLoading(true);
       setError(null);
 
-      const res = await api.get("/api/posts", {
+      const res = await api.get("/posts", {
         params: {
           page,
           sort,
